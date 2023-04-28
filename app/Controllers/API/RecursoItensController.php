@@ -1,12 +1,9 @@
-<?php
-
-namespace App\Controllers;
-
-use App\Controllers\ValidacaoUtil;
+<?php namespace App\Controllers\API;
 
 use Exception;
+use CodeIgniter\RESTful\ResourceController;
 
-class RecursoItensController extends ValidacaoUtil{
+class RecursoItensController extends ResourceController{
     
     private $recursoItensModel;
     public $descricaoController = "Recurso Itens";

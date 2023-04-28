@@ -1,43 +1,43 @@
-<?php
-
-namespace App\Controllers;
+<?php namespace App\Controllers\API;
 
 use App\Controllers\ValidacaoUtil;
 use Exception;
 
-class ItensCartaoMesController extends ValidacaoUtil{
+class UserController extends ValidacaoUtil{
     
-    private $itensCartaoMesModel;
-    public $descricaoController = "Itens Cartão Mês";
+    private $userModel;
+    public $descricaoController = "Usuário";
+    private $builder;
     
     public function __construct()
     {
-        $this->itensCartaoMesModel = new \App\Models\ItensCartaoMesModel();
+        $this->userModel = new \App\Models\UserModel();
+        $db      = \Config\Database::connect();
+        $this->builder = $db->table('tbfin_user');
     }
     
     public function list()
-    {        
-        return $this->response->setJSON($this->itensCartaoMesModel->findAll());
+    {
+        return $this->response->setJSON($this->userModel->findAll());
     }
     
     public function create()
     {
-        $newItensCartaoMes = $this->request->getJSON();
+        $newUser = $this->request->getJSON();
 
         $response = [
             'response'  => 'error',
-            'msg'       => 'Error ao criar '.$this->descricaoController,
+            'msg'       => 'Error ao criar x '.$this->descricaoController,
         ];
 
-        if(isset($newItensCartaoMes->id_cartao)
-            && isset($newItensCartaoMes->dt_venc_itens_cartao_mes)){
+        if(isset($newUser->nome_user) && isset($newUser->email_user) && isset($newUser->senha_user)){
 
-            $itensCartaoMes = new \App\Entities\ItensCartaoMes();
-            $itensCartaoMes->id_cartao = $newItensCartaoMes->id_cartao;
-            $itensCartaoMes->dt_venc_itens_cartao_mes  = $newItensCartaoMes->dt_venc_itens_cartao_mes;
-            if(isset($newItensCartaoMes->vlr_t_itens_mes)){ $itensCartaoMes->vlr_t_itens_mes = $newItensCartaoMes->vlr_t_itens_mes; }
+            $user = new \App\Entities\User();
+            $user->nome_user = $newUser->nome_user;
+            $user->email_user  = $newUser->email_user;
+            $user->senha_user  = $newUser->senha_user;
            
-           if($this->itensCartaoMesModel->save($itensCartaoMes)){
+           if($this->userModel->save($user)){
             $response = [
                 'response'  => 'success',
                 'msg'       => $this->descricaoController.' criado com sucesso',
@@ -50,7 +50,7 @@ class ItensCartaoMesController extends ValidacaoUtil{
     }
     
     public function delete($id = null){
-        
+
         $response = [];
         
         if(is_null($id)){
@@ -60,7 +60,7 @@ class ItensCartaoMesController extends ValidacaoUtil{
             ];
         }else{
             
-            if($this->itensCartaoMesModel->delete($id)){
+            if($this->userModel->delete($id)){
                 $response = [
                     'response'  => 'success',
                     'msg'       => $this->descricaoController.' deletado com sucesso',
@@ -73,7 +73,7 @@ class ItensCartaoMesController extends ValidacaoUtil{
     }
     
     public function buscar($id = null){
-        
+
         $response = [];
         
         if(is_null($id)){
@@ -83,31 +83,29 @@ class ItensCartaoMesController extends ValidacaoUtil{
             ];
             
         }else{
-            $response = $this->itensCartaoMesModel->find($id);
+            $response = $this->userModel->find($id);
         }
 
         return $this->response->setJSON($response);
         
     }
     
-     public function update($id = null){
-       
+   public function update($id = null){
+
         $response = [
             'response'  => 'error',
             'msg'       => 'Error ao atualizar '.$this->descricaoController,
         ];
 
-        $newItensCartaoMes = $this->request->getJSON();
-        $itensCartaoMes = $this->itensCartaoMesModel->find($newItensCartaoMes->id_itens_cartao_mes);
+        $newUser = $this->request->getJSON();
+        $user = $this->userModel->find($newUser->id_user);
       
-        if(isset($itensCartaoMes->id_itens_cartao_mes)){
-            if(isset($newItensCartaoMes->vlr_t_itens_mes)){ $itensCartaoMes->vlr_t_itens_mes = $newItensCartaoMes->vlr_t_itens_mes; }
-            if(isset($newItensCartaoMes->dt_venc_itens_cartao_mes)){ $itensCartaoMes->dt_venc_itens_cartao_mes = $newItensCartaoMes->dt_venc_itens_cartao_mes; }
-            if(isset($newItensCartaoMes->id_cartao)){ $itensCartaoMes->id_cartao = $newItensCartaoMes->id_cartao; }
-            if(isset($newItensCartaoMes->status_pag_itens_cartao_mes)){ $itensCartaoMes->status_pag_itens_cartao_mes = $newItensCartaoMes->status_pag_itens_cartao_mes; }
+        if(isset($user->id_user)){
+            if(isset($newUser->nome_user)){ $user->nome_user = $newUser->nome_user; }
+            if(isset($newUser->email_user)){ $user->email_user = $newUser->email_user; }
                 
             try{
-                if($this->itensCartaoMesModel->save($itensCartaoMes)){
+                if($this->userModel->save($user)){
                     $response = [
                         'response'  => 'success',
                         'msg'       => $this->descricaoController.' atualizado com sucesso',
@@ -116,7 +114,7 @@ class ItensCartaoMesController extends ValidacaoUtil{
                     $response = [
                         'response'  => 'error',
                         'msg'       => 'Erro ao cadastrar '.$this->descricaoController,
-                        'errors'    => $this->itensCartaoMesModel->errors()
+                        'errors'    => $this->userModel->errors()
                     ];
                 }
 
@@ -125,7 +123,7 @@ class ItensCartaoMesController extends ValidacaoUtil{
                     'response'  => 'error',
                     'msg'       => 'Erro ao cadastrar '.$this->descricaoController,
                     'errors'    => [
-                        'exception' => $e->getMessage()
+                        'exception' => $e->getCode() //  $e->getMessage()
                     ]
                 ];
             }
@@ -135,4 +133,25 @@ class ItensCartaoMesController extends ValidacaoUtil{
         return $this->response->setJSON($response);
     }
     
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

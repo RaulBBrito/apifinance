@@ -1,45 +1,39 @@
-<?php
+<?php namespace App\Controllers\API;
 
-namespace App\Controllers;
-
-use App\Controllers\ValidacaoUtil;
 use Exception;
+use CodeIgniter\RESTful\ResourceController;
 
-class UserController extends ValidacaoUtil{
+class TipoItemMesController extends ResourceController{
     
-    private $userModel;
-    public $descricaoController = "Usuário";
-    private $builder;
+    private $tipoItemMesModel;
+    public $descricaoController = "Tipo Item Mês";
     
     public function __construct()
     {
-        $this->userModel = new \App\Models\UserModel();
-        $db      = \Config\Database::connect();
-        $this->builder = $db->table('tbfin_user');
+        $this->tipoItemMesModel = new \App\Models\TipoItemMesModel();
     }
     
     public function list()
     {
-        return $this->response->setJSON($this->userModel->findAll());
+        return $this->response->setJSON($this->tipoItemMesModel->findAll());
     }
     
     public function create()
     {
-        $newUser = $this->request->getJSON();
+
+        $newTipoItemMes = $this->request->getJSON();
 
         $response = [
             'response'  => 'error',
             'msg'       => 'Error ao criar '.$this->descricaoController,
         ];
 
-        if(isset($newUser->nome_user) && isset($newUser->email_user) && isset($newUser->senha_user)){
+        if(isset($newTipoItemMes->desc_tipo_item_mes)){
 
-            $user = new \App\Entities\User();
-            $user->nome_user = $newUser->nome_user;
-            $user->email_user  = $newUser->email_user;
-            $user->senha_user  = $newUser->senha_user;
+            $tipoItemMes = new \App\Entities\TipoItemMes();
+            $tipoItemMes->desc_tipo_item_mes = $newTipoItemMes->desc_tipo_item_mes;
            
-           if($this->userModel->save($user)){
+           if($this->tipoItemMesModel->save($tipoItemMes)){
             $response = [
                 'response'  => 'success',
                 'msg'       => $this->descricaoController.' criado com sucesso',
@@ -62,7 +56,7 @@ class UserController extends ValidacaoUtil{
             ];
         }else{
             
-            if($this->userModel->delete($id)){
+            if($this->tipoItemMesModel->delete($id)){
                 $response = [
                     'response'  => 'success',
                     'msg'       => $this->descricaoController.' deletado com sucesso',
@@ -75,7 +69,7 @@ class UserController extends ValidacaoUtil{
     }
     
     public function buscar($id = null){
-
+        
         $response = [];
         
         if(is_null($id)){
@@ -85,29 +79,30 @@ class UserController extends ValidacaoUtil{
             ];
             
         }else{
-            $response = $this->userModel->find($id);
+            $response = $this->tipoItemMesModel->find($id);
         }
 
         return $this->response->setJSON($response);
         
     }
     
-   public function update($id = null){
+      public function update($id = null){
 
         $response = [
             'response'  => 'error',
             'msg'       => 'Error ao atualizar '.$this->descricaoController,
         ];
 
-        $newUser = $this->request->getJSON();
-        $user = $this->userModel->find($newUser->id_user);
+        $newTipoItemMes = $this->request->getJSON();
+        $tipoItemMes = $this->tipoItemMesModel->find($newTipoItemMes->id_tipo_item_mes);
       
-        if(isset($user->id_user)){
-            if(isset($newUser->nome_user)){ $user->nome_user = $newUser->nome_user; }
-            if(isset($newUser->email_user)){ $user->email_user = $newUser->email_user; }
+        if(isset($tipoItemMes->id_tipo_item_mes)){
+                
+            if(isset($newTipoItemMes->desc_tipo_item_mes)){ $tipoItemMes->desc_tipo_item_mes = $newTipoItemMes->desc_tipo_item_mes; }
+            if(isset($newTipoItemMes->status_tipo_item_mes)){ $tipoItemMes->status_tipo_item_mes = $newTipoItemMes->status_tipo_item_mes; }
                 
             try{
-                if($this->userModel->save($user)){
+                if($this->tipoItemMesModel->save($tipoItemMes)){
                     $response = [
                         'response'  => 'success',
                         'msg'       => $this->descricaoController.' atualizado com sucesso',
@@ -116,7 +111,7 @@ class UserController extends ValidacaoUtil{
                     $response = [
                         'response'  => 'error',
                         'msg'       => 'Erro ao cadastrar '.$this->descricaoController,
-                        'errors'    => $this->userModel->errors()
+                        'errors'    => $this->tipoItemMesModel->errors()
                     ];
                 }
 
@@ -125,7 +120,7 @@ class UserController extends ValidacaoUtil{
                     'response'  => 'error',
                     'msg'       => 'Erro ao cadastrar '.$this->descricaoController,
                     'errors'    => [
-                        'exception' => $e->getCode() //  $e->getMessage()
+                        'exception' => $e->getMessage()
                     ]
                 ];
             }
@@ -136,24 +131,5 @@ class UserController extends ValidacaoUtil{
     }
     
     
+    
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

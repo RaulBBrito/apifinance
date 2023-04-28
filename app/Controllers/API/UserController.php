@@ -1,11 +1,9 @@
-<?php
+<?php namespace App\Controllers\API;
 
-namespace App\Controllers;
-
-use App\Controllers\ValidacaoUtil;
 use Exception;
+use CodeIgniter\RESTful\ResourceController;
 
-class UserController extends ValidacaoUtil{
+class UserController extends ResourceController{ //ValidacaoUtil
     
     private $userModel;
     public $descricaoController = "Usuário";
@@ -20,7 +18,9 @@ class UserController extends ValidacaoUtil{
     
     public function list()
     {
-        return $this->response->setJSON($this->userModel->findAll());
+        $usuarios = $this->userModel->findAll();
+        return $this->respond($usuarios);
+        //return $this->response->setJSON($this->userModel->findAll());
     }
     
     public function create()
@@ -29,7 +29,7 @@ class UserController extends ValidacaoUtil{
 
         $response = [
             'response'  => 'error',
-            'msg'       => 'Error ao criar x '.$this->descricaoController,
+            'msg'       => 'Error ao criar '.$this->descricaoController,
         ];
 
         if(isset($newUser->nome_user) && isset($newUser->email_user) && isset($newUser->senha_user)){

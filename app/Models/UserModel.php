@@ -12,6 +12,6 @@ class UserModel extends Model{
         'senha_user'=>'required|min_length[3]'
         ];
 
-    protected $returnType    = 'App\Entities\User';
+    protected $returnType    = 'array'; ///'App\Entities\User';
     protected $useTimestamps = true;
 }

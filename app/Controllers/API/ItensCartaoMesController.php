@@ -1,41 +1,40 @@
-<?php
+<?php namespace App\Controllers\API;
 
-namespace App\Controllers;
-
-use App\Controllers\ValidacaoUtil;
 use Exception;
-
-class TipoItemMesController extends ValidacaoUtil{
+use CodeIgniter\RESTful\ResourceController;
+class ItensCartaoMesController extends ResourceController{
     
-    private $tipoItemMesModel;
-    public $descricaoController = "Tipo Item Mês";
+    private $itensCartaoMesModel;
+    public $descricaoController = "Itens Cartão Mês";
     
     public function __construct()
     {
-        $this->tipoItemMesModel = new \App\Models\TipoItemMesModel();
+        $this->itensCartaoMesModel = new \App\Models\ItensCartaoMesModel();
     }
     
     public function list()
-    {
-        return $this->response->setJSON($this->tipoItemMesModel->findAll());
+    {        
+        return $this->response->setJSON($this->itensCartaoMesModel->findAll());
     }
     
     public function create()
     {
-
-        $newTipoItemMes = $this->request->getJSON();
+        $newItensCartaoMes = $this->request->getJSON();
 
         $response = [
             'response'  => 'error',
             'msg'       => 'Error ao criar '.$this->descricaoController,
         ];
 
-        if(isset($newTipoItemMes->desc_tipo_item_mes)){
+        if(isset($newItensCartaoMes->id_cartao)
+            && isset($newItensCartaoMes->dt_venc_itens_cartao_mes)){
 
-            $tipoItemMes = new \App\Entities\TipoItemMes();
-            $tipoItemMes->desc_tipo_item_mes = $newTipoItemMes->desc_tipo_item_mes;
+            $itensCartaoMes = new \App\Entities\ItensCartaoMes();
+            $itensCartaoMes->id_cartao = $newItensCartaoMes->id_cartao;
+            $itensCartaoMes->dt_venc_itens_cartao_mes  = $newItensCartaoMes->dt_venc_itens_cartao_mes;
+            if(isset($newItensCartaoMes->vlr_t_itens_mes)){ $itensCartaoMes->vlr_t_itens_mes = $newItensCartaoMes->vlr_t_itens_mes; }
            
-           if($this->tipoItemMesModel->save($tipoItemMes)){
+           if($this->itensCartaoMesModel->save($itensCartaoMes)){
             $response = [
                 'response'  => 'success',
                 'msg'       => $this->descricaoController.' criado com sucesso',
@@ -48,7 +47,7 @@ class TipoItemMesController extends ValidacaoUtil{
     }
     
     public function delete($id = null){
-
+        
         $response = [];
         
         if(is_null($id)){
@@ -58,7 +57,7 @@ class TipoItemMesController extends ValidacaoUtil{
             ];
         }else{
             
-            if($this->tipoItemMesModel->delete($id)){
+            if($this->itensCartaoMesModel->delete($id)){
                 $response = [
                     'response'  => 'success',
                     'msg'       => $this->descricaoController.' deletado com sucesso',
@@ -81,30 +80,31 @@ class TipoItemMesController extends ValidacaoUtil{
             ];
             
         }else{
-            $response = $this->tipoItemMesModel->find($id);
+            $response = $this->itensCartaoMesModel->find($id);
         }
 
         return $this->response->setJSON($response);
         
     }
     
-      public function update($id = null){
-
+     public function update($id = null){
+       
         $response = [
             'response'  => 'error',
             'msg'       => 'Error ao atualizar '.$this->descricaoController,
         ];
 
-        $newTipoItemMes = $this->request->getJSON();
-        $tipoItemMes = $this->tipoItemMesModel->find($newTipoItemMes->id_tipo_item_mes);
+        $newItensCartaoMes = $this->request->getJSON();
+        $itensCartaoMes = $this->itensCartaoMesModel->find($newItensCartaoMes->id_itens_cartao_mes);
       
-        if(isset($tipoItemMes->id_tipo_item_mes)){
-                
-            if(isset($newTipoItemMes->desc_tipo_item_mes)){ $tipoItemMes->desc_tipo_item_mes = $newTipoItemMes->desc_tipo_item_mes; }
-            if(isset($newTipoItemMes->status_tipo_item_mes)){ $tipoItemMes->status_tipo_item_mes = $newTipoItemMes->status_tipo_item_mes; }
+        if(isset($itensCartaoMes->id_itens_cartao_mes)){
+            if(isset($newItensCartaoMes->vlr_t_itens_mes)){ $itensCartaoMes->vlr_t_itens_mes = $newItensCartaoMes->vlr_t_itens_mes; }
+            if(isset($newItensCartaoMes->dt_venc_itens_cartao_mes)){ $itensCartaoMes->dt_venc_itens_cartao_mes = $newItensCartaoMes->dt_venc_itens_cartao_mes; }
+            if(isset($newItensCartaoMes->id_cartao)){ $itensCartaoMes->id_cartao = $newItensCartaoMes->id_cartao; }
+            if(isset($newItensCartaoMes->status_pag_itens_cartao_mes)){ $itensCartaoMes->status_pag_itens_cartao_mes = $newItensCartaoMes->status_pag_itens_cartao_mes; }
                 
             try{
-                if($this->tipoItemMesModel->save($tipoItemMes)){
+                if($this->itensCartaoMesModel->save($itensCartaoMes)){
                     $response = [
                         'response'  => 'success',
                         'msg'       => $this->descricaoController.' atualizado com sucesso',
@@ -113,7 +113,7 @@ class TipoItemMesController extends ValidacaoUtil{
                     $response = [
                         'response'  => 'error',
                         'msg'       => 'Erro ao cadastrar '.$this->descricaoController,
-                        'errors'    => $this->tipoItemMesModel->errors()
+                        'errors'    => $this->itensCartaoMesModel->errors()
                     ];
                 }
 
@@ -131,7 +131,5 @@ class TipoItemMesController extends ValidacaoUtil{
 
         return $this->response->setJSON($response);
     }
-    
-    
     
 }

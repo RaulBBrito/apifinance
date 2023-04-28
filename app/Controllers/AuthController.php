@@ -1,85 +1,69 @@
-<?php 
+<?php namespace App\Controllers;
 
-namespace App\Controllers;
-
-use CodeIgniter\RESTful\ResourceController;
+use Exception;
 use Config\Services;
 use Firebase\JWT\JWT;
 
-use App\Controllers\ValidacaoUtil;
-use Exception;
+class AuthController extends BaseController {
 
-class AuthController extends ValidacaoUtil //ResourceController
-{
+	public function __construct()
+    {
+        helper('secure_password');
+    }
 
-	protected $format = 'json';
+	public function login(){
+		try {
+			
+			$newUser = $this->request->getJSON();
 
-	public function create()
-	{
-		/**
-		 * JWT claim types
-		 * https://auth0.com/docs/tokens/concepts/jwt-claims#reserved-claims
-		 */
-        $userLogin = $this->request->getJSON();
-		
-		$email = $userLogin->email_user; //$this->request->getPost('email');
-		$password = $userLogin->senha_user; //$this->request->getPost('password');
-    
-    
-        
+			$email = $newUser->username;
+			$password = $newUser->password;
 
-        $response = [
-            'response'  => 'Sucesso'.$password,
-            'msg'       => 'Ok Cheguei aqui'.$email
-        ];
-        
-        //return $this->response->setJSON($response);
-		
+			$usuarioModel = new \App\Models\UserModel();
+			$where = ['email_user' => $email, 'senha_user' => $password];
+			
+			$validaUsuario = $usuarioModel->where($where)->first();
 
-		// add code to fetch through db and check they are valid
-		// sending no email and password also works here because both are empty
-		if ($email === $password) {
-		    $time = time();
-			$key = Services::getSecretKey();
+			if($validaUsuario == null){
+				return $this->response->setJSON([
+					'response'  => 'error',
+					'msg'       => 'Usuario não encontrado',
+			]);
+			}
+
+			if(verifyPassword($password, hasPassword($validaUsuario['senha_user']))){
+				$jwt = $this->generateJWT($validaUsuario);
+				return $this->response->setJSON(['token' => $jwt], 201);
+			}
+
+			return $this->response->setJSON([
+				'response'  => 'success',
+				'msg'       => 'Usuario encontrado',
+		]);
+
+		} catch (Exception $e) {
+			return $this->response->setJSON([
+				'response'  => 'error',
+				'msg'       => 'Erro no Servidor',
+		]);
+		}
+	}
+
+	protected function generateJWT($validaUsuario){
+			$Key = Services::getSecretKey();
+			$time = time();
 			$payload = [
+				'aud' => base_url(),
 				'iat' => $time,
-				'exp' => $time + 60, // em segundos
-				'data' => ['email'=>'admin@admin.com','name'=>'Raul']
+				'exp' => $time + 60,
+				'data' => [
+						'nome' => $validaUsuario['nome_user'],
+						'email' => $validaUsuario['email_user']
+				]
 			];
 
-			/**
-			 * IMPORTANT:
-			 * You must specify supported algorithms for your application. See
-			 * https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40
-			 * for a list of spec-compliant algorithms.
-			 */
-			$jwt = JWT::encode($payload, $key);
-			//return $this->respond(['token' => $jwt], 200);
-			return $this->response->setJSON($payload);
-		}
-
-		return $this->respond(['message' => 'Invalid login details'], 401);
-	}
-	
-	protected function validadeToken($token){
-	  try{
-	      $key = Services::getSecretKey();
-	      return JWT::decode($token,$key,array('HS256'));
-	  }catch(\Exception $e){
-	      return false;
-	  } 
-	}
-	
-	public function verifyToken(){
-         $key = Services::getSecretKey();  
-         $token = $this->request->getPost("token");
-         
-         if($this-validadeToken($token) == false){
-             return $this->respond(['message'=>'Token Invalido'],401);
-         }else{
-             $data = JWT::decode($token,$key,array('HS256'));
-             return $this->respond(['data'=>$data],200);
-         }
+			$jwt = JWT::encode($payload, $Key, 'HS256');
+			return $jwt;
 	}
 }
 

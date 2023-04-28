@@ -1,11 +1,9 @@
-<?php
-
-namespace App\Controllers;
+<?php namespace App\Controllers\API;
 
 use App\Controllers\ValidacaoUtil;
 use Exception;
-
-class MensalController extends ValidacaoUtil{
+use CodeIgniter\RESTful\ResourceController;
+class MensalController extends ResourceController{
     
     private $mensalModel;
     public $descricaoController = "Mensal"; 
